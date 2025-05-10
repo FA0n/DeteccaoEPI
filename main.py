@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, WebSocket
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from ultralytics import YOLO
+import uvicorn
 import webbrowser
 import cv2
 import time
@@ -98,6 +99,5 @@ def start_api():
     return JSONResponse(content={"message": "A API já está em execução!"})
 
 if __name__ == "__main__":
-    import uvicorn
     webbrowser.open("http://127.0.0.1:8000")
     uvicorn.run(app, host="127.0.0.1", port=8000)
