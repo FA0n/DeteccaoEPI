@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+            color: red;
+        }
+        #notifications {
+            margin-top: 20px;
+            font-size: 16px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Iniciar Sistema de Detecção de EPI</h1>
+    <p>Clique no botão abaixo para iniciar a API:</p>
+    <button onclick="startAPI()">Iniciar</button>
+    <button onclick="connectWebSocket()">Verificar Violações</button>
+    <p id="status"></p>
+    <div id="notifications"></div>
+
+    <script>
+        let ws; // Variável para armazenar a conexão WebSocket
+
+        async function startAPI() {
+            try {
+                const response = await fetch('/start', { method: 'POST' });
+                const data = await response.json();
+                if (data.message) {
+                    window.open('/video_feed', '_blank');
+                }
+            } catch (error) {
+                document.getElementById('status').innerText = "Erro ao iniciar a API.";
+                console.error(error);
+            }
+        }
+
+        function connectWebSocket() {
+            if (!ws || ws.readyState === WebSocket.CLOSED) {
+                ws = new WebSocket('ws://127.0.0.1:8000/ws');
+                ws.onopen = function() {
+                    document.getElementById('status').innerText = "Conectado ao WebSocket!";
+                };
+                ws.onmessage = function(event) {
+                    const notifications = document.getElementById('notifications');
+                    const data = JSON.parse(event.data); // Converte a mensagem recebida para JSON
+
+                    // Elemento para exibir a classe detectada
+                    const message = document.createElement('p');
+                    message.innerText = `Alerta: ${data.class_name} detectado!`;
+                    notifications.appendChild(message);
+
+                    // Elemento para exibir a imagem
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${data.image}`;
+                    img.style.maxWidth = "300px"; // tamanho da imagem
+                    img.style.marginTop = "10px";
+                    notifications.appendChild(img);
+                };
+                ws.onclose = function() {
+                    document.getElementById('status').innerText = "WebSocket desconectado.";
+                };
+                ws.onerror = function(error) {
+                    document.getElementById('status').innerText = "Erro no WebSocket.";
+                    console.error(error);
+                };
+            } else {
+                document.getElementById('status').innerText = "WebSocket já está conectado.";
+            }
+        }
+    </script>
+</body>
+</html>
