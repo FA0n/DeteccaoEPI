@@ -20,7 +20,7 @@ Baixe o modelo YOLO:
      from ultralytics import YOLO
      model = YOLO('yolov8n.pt')
      ```
-   - Ou manualmente pelo site da Ultralytics.
+   - Ou manualmente pelo site da Ultralytics entre outros.
 
 Inicie o servidor:
 
