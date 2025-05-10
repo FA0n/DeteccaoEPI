@@ -8,7 +8,8 @@ Instale as dependências:
 
    ```
    pip install fastapi uvicorn uvicorn[standard] torch torchvision ultralytics opencv-python pillow 
-   
+   ```
+   ```
    pip install -r requirements.txt
    ```
 
@@ -26,10 +27,11 @@ Inicie o servidor:
    ```
    uvicorn main:app --reload
    ```
+   - Ou inicie o main.py
 
 Acesse:
 
-   - Vídeo da webcam: [http://localhost:8000](http://localhost:8000/video_feed)
+   - Vídeo da webcam: [http://localhost:8000][http://localhost:8000/video_feed]
 
 ## Observações
 
