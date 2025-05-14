@@ -15,6 +15,12 @@
             font-size: 16px;
             cursor: pointer;
         }
+
+        .video-strem {
+            width: 100%; 
+            max-width: 640px; 
+            border: 1px solid #ccc
+        }
         #status {
             margin-top: 20px;
             font-size: 18px;
@@ -29,8 +35,16 @@
 </head>
 <body>
     <h1>Iniciar Sistema de Detecção de EPI</h1>
-    <p>Clique no botão abaixo para iniciar a API:</p>
+    <p>Clique no botão abaixo para iniciar ou encerrar a API:</p>
     <button onclick="startAPI()">Iniciar</button>
+    <button onclick="stopAPI()">Encerrar</button>
+
+    <!-- Div que contém o vídeo -->
+    <div id="video-container" style="display: none;">
+        <h2>Streaming de Vídeo</h2>
+        <img id="video-stream" src="/video_feed" alt="Streaming de Vídeo" >
+    </div>
+
     <button onclick="connectWebSocket()">Verificar Violações</button>
     <p id="status"></p>
     <div id="notifications"></div>
@@ -43,10 +57,30 @@
                 const response = await fetch('/start', { method: 'POST' });
                 const data = await response.json();
                 if (data.message) {
-                    window.open('/video_feed', '_blank');
+                    document.getElementById('status').innerText = "API iniciada com sucesso!";
+                    document.getElementById('video-container').style.display = "block"; // Exibe o vídeo
                 }
             } catch (error) {
                 document.getElementById('status').innerText = "Erro ao iniciar a API.";
+                console.error(error);
+            }
+        }
+
+        async function stopAPI() {
+            try {
+                const response = await fetch('/stop', { method: 'GET' });
+                if (response.ok) {
+                    document.getElementById('status').innerText = "API encerrada com sucesso!";
+                    document.getElementById('video-container').style.display = "none"; // Oculta o vídeo
+                    document.getElementById('notifications').innerHTML = ""; // Limpa as notificações
+                    setTimeout(() => {
+                        document.getElementById('status').innerText = "";
+                    }, 2000)
+                }
+            } catch (error) {
+                document.getElementById('status').innerText = "Erro ao encerrar a API.";
+                console.error(error);
+                document.getElementById('status').innerText = "Erro ao encerrar a câmera";
                 console.error(error);
             }
         }
@@ -58,25 +92,21 @@
                     document.getElementById('status').innerText = "Conectado ao WebSocket!";
                 };
                 ws.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
                     const notifications = document.getElementById('notifications');
-                    const data = JSON.parse(event.data); // Converte a mensagem recebida para JSON
-
-                    // Elemento para exibir a classe detectada
                     const message = document.createElement('p');
                     message.innerText = `Alerta: ${data.class_name} detectado!`;
                     notifications.appendChild(message);
 
-                    // Elemento para exibir a imagem
                     const img = document.createElement('img');
                     img.src = `data:image/jpeg;base64,${data.image}`;
-                    img.style.maxWidth = "300px"; // tamanho da imagem
-                    img.style.marginTop = "10px";
+                    img.style.maxWidth = "200px";
                     notifications.appendChild(img);
                 };
                 ws.onclose = function() {
                     document.getElementById('status').innerText = "WebSocket desconectado.";
                 };
-                ws.onerror = function(error) {
+                ws.onerror = function() {
                     document.getElementById('status').innerText = "Erro no WebSocket.";
                     console.error(error);
                 };

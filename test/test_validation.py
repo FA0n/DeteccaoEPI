@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from main import app
 
 client = TestClient(app)
+os.environ["TEST_ENV"] = "True"
 
 def test_serve_homepage():
     response = client.get("/")
@@ -21,6 +22,11 @@ def test_start_endpoint():
     response = client.post("/start")
     assert response.status_code == 200
     assert response.json() == {"message": "A API já está em execução!"}
+
+def test_stop_endpoint():
+    response = client.get("/stop")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Captura encerrada com sucesso!"}
 
 def test_invalid_endpoint():
     response = client.get("/invalid-endpoint")

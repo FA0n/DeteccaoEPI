@@ -1,10 +1,12 @@
 from fastapi import FastAPI, UploadFile, File, WebSocket
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from ultralytics import YOLO
-import uvicorn, webbrowser, cv2, time, asyncio, base64
-import os
+import webbrowser, cv2, uvicorn
+import os, sys, signal, time, asyncio, base64, threading
 
 app = FastAPI()
+
+is_capturing = False
 
 model = YOLO('models/best.pt')  # Carregar o modelo treinado
 
@@ -33,6 +35,9 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"Erro no WebSocket: {e}")
         active_connections.remove(websocket)
+    finally:
+        if websocket in active_connections:
+            active_connections.remove(websocket)
 
 # Função para enviar notificações via WebSocket
 async def send_alert(class_name: str, filename: str):
@@ -52,11 +57,20 @@ async def send_alert(class_name: str, filename: str):
 
 # Função para capturar frames da webcam e detectar
 def generate_frames():
+    global cap, is_capturing
+    # if cap is None or not cap.isOpened():
+    #     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Recria o objeto cap
+    #     if not cap.isOpened():
+    #         raise RuntimeError("Erro ao acessar a câmera!")
 
     last_saved_time = 0
     delay = 5
 
     while True:
+        if not is_capturing:
+            time.sleep(0.1)
+            continue
+
         success, frame = cap.read()
         if not success:
             break
@@ -95,9 +109,36 @@ def video_feed():
 
 @app.post("/start")
 def start_api():
-    # Retorna uma mensagem indicando que a API foi iniciada
+    global cap, is_capturing
+    if cap is None or not cap.isOpened():
+        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        if not cap.isOpened():
+            return JSONResponse(content={"message": "Erro ao acessar a câmera!"}, status_code=500)
+    is_capturing = True
     return JSONResponse(content={"message": "A API já está em execução!"})
 
+@app.get("/stop")
+def stop_api():
+    global cap, is_capturing
+    if cap is not None and cap.isOpened():
+        cap.release()
+        cap = None
+    is_capturing = False
+    return JSONResponse(content={"message": "Captura encerrada com sucesso!"})
+
+def open_browser():
+    webbrowser.open("http://127.0.1:8000")
+
+def signal_handler(sig, frame):
+    print("Encerrando o servidor...")
+
+    if cap is not None and cap.isOpened():
+        cap.release()
+    
+    sys.exit(0)
+
+
 if __name__ == "__main__":
-    webbrowser.open("http://127.0.0.1:8000")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    signal.signal(signal.SIGINT, signal_handler)
+    threading.Thread(target=open_browser, daemon=True).start()
+    asyncio.run(uvicorn.run(app, host="127.0.0.1", port=8000))
