@@ -39,3 +39,5 @@ Acesse:
    que use o primeiro pip install apresentado acima, pois é garantida a intalação de todas as bibliotecas requeridas.
 
    - Para melhorar a detecção de EPIs reais, troque o modelo `.pt` por um modelo treinado específico.
+
+   - O sistema esta em desenvolvimento, pode e vai ter muitos erros.
