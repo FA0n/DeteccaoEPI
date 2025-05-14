@@ -1,12 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, WebSocket
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from ultralytics import YOLO
-import uvicorn
-import webbrowser
-import cv2
-import time
-import asyncio
-import base64
+import uvicorn, webbrowser, cv2, time, asyncio, base64
+import os
 
 app = FastAPI()
 
@@ -15,7 +11,10 @@ model = YOLO('models/best.pt')  # Carregar o modelo treinado
 # Inicializa a webcam
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 if not cap.isOpened():
-    print("Erro ao acessar a webcam")
+    raise RuntimeError("Erro ao acessar a webcam")
+
+if not os.path.exists("violations"):
+    os.makedirs("violations")
 
 @app.get("/")
 def serve_homepage():
@@ -31,7 +30,8 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             await websocket.receive_text()  # Mantém a conexão aberta
-    except:
+    except Exception as e:
+        print(f"Erro no WebSocket: {e}")
         active_connections.remove(websocket)
 
 # Função para enviar notificações via WebSocket

@@ -1,5 +1,6 @@
 __pycache__/
 datasets/
+.pytest_cache
 *.pyc
 *.pyo
 *.log
