@@ -47,61 +47,71 @@
 
     let ws;
 
-    function connectWebSocket() {
-      if (!ws || ws.readyState === WebSocket.CLOSED) {
-        ws = new WebSocket('ws://127.0.0.1:8000/ws');
+  function exibirNotificacao(className, timestamp, imageSrc) {
+    const notifications = document.getElementById('notifications');
 
-        ws.onopen = () => {
-          const status = document.createElement('p');
-          status.innerText = "Conectado ao WebSocket!";
-          status.style.color = "green";
-          document.getElementById('notifications').appendChild(status);
-        };
+    const card = document.createElement('div');
+    card.className = 'notification-card';
 
-        ws.onmessage = (event) => {
-          const notifications = document.getElementById('notifications');
-          const data = JSON.parse(event.data);
+    const title = document.createElement('h3');
+    title.innerText = `⚠️ Alerta: ${className} detectado`;
 
-          const card = document.createElement('div');
-          card.className = 'notification-card';
+    const time = document.createElement('p');
+    time.className = 'notification-time';
+    time.innerText = timestamp;
 
-          const title = document.createElement('h3');
-          title.innerText = `⚠️ Alerta: ${data.class_name} detectado`;
+    const img = document.createElement('img');
+    img.src = imageSrc;
+    img.alt = "Imagem da violação";
+    img.className = 'notification-image';
 
-          const time = document.createElement('p');
-          time.className = 'notification-time';
-          time.innerText = new Date().toLocaleString('pt-BR');
+    card.appendChild(title);
+    card.appendChild(time);
+    card.appendChild(img);
 
-          const img = document.createElement('img');
-          img.src = `data:image/jpeg;base64,${data.image}`;
-          img.alt = "Imagem da violação";
-          img.className = 'notification-image';
+    notifications.prepend(card);
+  }
+    
+	function carregarNotificacoesAnteriores() {
+		fetch('/notifications')
+		  .then(res => res.json())
+		  .then(dados => {
+			dados.forEach(n => {
+			  const imgPath = `/${n.filename}`;
+			  exibirNotificacao(n.class_name, n.timestamp, imgPath);
+			});
+		  })
+		  .catch(err => console.error('Erro ao carregar notificações:', err));
+	  }
 
-          card.appendChild(title);
-          card.appendChild(time);
-          card.appendChild(img);
+	function connectWebSocket() {
+		if (!ws || ws.readyState === WebSocket.CLOSED) {
+		  ws = new WebSocket('ws://127.0.0.1:8000/ws');
 
-          notifications.prepend(card);
-        };
+		  ws.onopen = () => {
+			console.log("WebSocket conectado.");
+		  };
 
-        ws.onclose = () => {
-          const msg = document.createElement('p');
-          msg.innerText = "WebSocket desconectado.";
-          msg.style.color = "gray";
-          document.getElementById('notifications').appendChild(msg);
-        };
+		  ws.onmessage = (event) => {
+			const data = JSON.parse(event.data);
+			const timestamp = new Date().toLocaleString('pt-BR');
+			const imgSrc = `data:image/jpeg;base64,${data.image}`;
+			exibirNotificacao(data.class_name, timestamp, imgSrc);
+		  };
 
-        ws.onerror = (error) => {
-          const msg = document.createElement('p');
-          msg.innerText = "Erro no WebSocket.";
-          msg.style.color = "red";
-          document.getElementById('notifications').appendChild(msg);
-          console.error(error);
-        };
-      }
-    }
+		  ws.onclose = () => {
+			console.warn("WebSocket desconectado.");
+		  };
 
-    window.onload = connectWebSocket;
+		  ws.onerror = (error) => {
+			console.error("Erro no WebSocket:", error);
+		  };
+		}
+	  }
+  window.onload = () => {
+    connectWebSocket();
+    carregarNotificacoesAnteriores();
+  };
   </script>
   <script src="dashboard.js"></script>
 </body>

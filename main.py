@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import BackgroundTasks
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from ultralytics import YOLO
-import webbrowser, cv2, uvicorn
+import webbrowser, cv2, uvicorn, json
 import os, sys, signal, time, asyncio, base64, threading
 
 app = FastAPI()
@@ -13,11 +13,15 @@ cap = None
 
 model = YOLO('models/best.pt')  # Carregar o modelo treinado
 
+NOTIFICATIONS_FILE = "notifications.json"
+
 if not os.path.exists("violations"):
     os.makedirs("violations")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/static/img", StaticFiles(directory="static/img"), name="img")
+app.mount("/violations", StaticFiles(directory="violations"), name="violations")
+
 @app.get("/")
 def serve_homepage():
     return FileResponse("static/index.html")
@@ -44,16 +48,41 @@ async def send_alert(class_name: str, filename: str):
     # Lê a imagem salva e converte para base64
     with open(filename, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-    
     # Cria a mensagem com a imagem em base64
     message = {
         "class_name": class_name,
+        "filename": os.path.basename(filename),
         "image": encoded_string
     }
-    
+    salvar_notificacao(class_name, filename)
     # Envia a mensagem para todas as conexões WebSocket ativas
     for connection in active_connections:
         await connection.send_json(message)
+
+def salvar_notificacao(class_name: str, filename: str):
+    notificacao = {
+        "class_name": class_name,
+        "filename": filename,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    try:
+        with open(NOTIFICATIONS_FILE, "r") as file:
+            notificacoes = json.load(file)
+    except FileNotFoundError:
+        notificacoes = []
+
+    notificacoes.append(notificacao)
+    with open(NOTIFICATIONS_FILE, "w") as file:
+        json.dump(notificacoes, file, indent=2)
+        
+@app.get("/notifications")
+def listar_notificacoes():
+    try:
+        with open(NOTIFICATIONS_FILE, "r") as file:
+            notificacoes = json.load(file)
+    except FileNotFoundError:
+        notificacoes = []
+    return notificacoes
 
 # Função para capturar frames da webcam e detectar
 def generate_frames():
