@@ -40,4 +40,4 @@ Acesse:
 
    - Para melhorar a detecção de EPIs reais, troque o modelo `.pt` por um modelo treinado específico.
 
-   - O sistema esta em desenvolvimento, pode e vai ter muitos erros.
+   - O sistema esta em desenvolvimento, pode e vão ter muitos erros.
