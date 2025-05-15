@@ -29,9 +29,11 @@ Inicie o servidor:
    ```
    - Ou inicie o main.py
 
-Acesse:
+Como Acessar e utilizar:
 
-   - Vídeo da webcam: [http://localhost:8000][http://localhost:8000/video_feed]
+   - Ao iniciar o sistema localmente o site será aberto automaticamente [http://localhost:8000]
+   - Para iniciar a captura, no caso do site criado, tera que realizar o login e no dashboard iniciar o monitoramente, assim a camera
+   configurada é ligada e o video_feed aberto. 
 
 ## Observações
 
