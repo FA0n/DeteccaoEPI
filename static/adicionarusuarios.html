@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Usuários - VisionSafe</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>VisionSafe</h2>
+            <button class="close-btn" onclick="toggleSidebar()">×</button>
+        </div>
+        <ul class="sidebar-list">
+      <li><a href="dashboard.html">Início</a></li>
+      <li><a href="iniciarsistema.html">Iniciar Sistema</a></li>
+      <li><a href="notificacoes.html">Notificações</a></li>
+      <li><a href="relatorios.html">Relatórios</a></li>
+      <li><a href="adicionarusuarios.html">Adicionar Usuários</a></li>
+      <li><a href="login.html">Sair <i class="fas fa-sign-out-alt"></i></a></li>
+    </ul>
+    </nav>
+
+    <div class="main-content">
+        <header class="header">
+            <button class="open-btn" onclick="toggleSidebar()">☰</button>
+            <h1>Adicionar Usuários</h1>
+        </header>
+
+        <main class="dashboard-main">
+            <section class="user-form">
+                <h2>Cadastrar Novo Usuário</h2>
+                <form id="addUserForm">
+                    <input type="text" id="username" placeholder="Nome do Usuário" required>
+                    <input type="email" id="useremail" placeholder="Email" required>
+                    <select id="usertype">
+                        <option value="Administrador">Administrador</option>
+                        <option value="Operador">Operador</option>
+                        <option value="Visitante">Visitante</option>
+                    </select>
+                    <button type="submit">Adicionar</button>
+                </form>
+            </section>
+
+            <section class="user-table">
+                <h2>Usuários Cadastrados</h2>
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        document.getElementById('addUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('username').value;
+            const email = document.getElementById('useremail').value;
+            const type = document.getElementById('usertype').value;
+
+            const table = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+
+            newRow.innerHTML = `
+                <td>${name}</td>
+                <td>${email}</td>
+                <td>${type}</td>
+                <td><button class="remove-btn" onclick="removeUser(this)">Remover</button></td>
+            `;
+
+            document.getElementById('addUserForm').reset();
+        });
+
+        function removeUser(button) {
+            const row = button.closest('tr');
+            row.remove();
+        }
+    </script>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

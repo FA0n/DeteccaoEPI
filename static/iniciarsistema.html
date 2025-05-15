@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar Sistema - VisionSafe</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>VisionSafe</h2>
+      <button class="close-btn" onclick="toggleSidebar()">×</button>
+    </div>
+    <ul class="sidebar-list">
+      <li><a href="dashboard.html">Início</a></li>
+      <li><a href="iniciarsistema.html">Iniciar Sistema</a></li>
+      <li><a href="notificacoes.html">Notificações</a></li>
+      <li><a href="relatorios.html">Relatórios</a></li>
+      <li><a href="adicionarusuarios.html">Adicionar Usuários</a></li>
+      <li><a href="login.html">Sair <i class="fas fa-sign-out-alt"></i></a></li>
+    </ul>
+  </nav>
+
+  <div class="main-content">
+    <header class="header">
+      <button class="open-btn" onclick="toggleSidebar()">☰</button>
+      <h1>Iniciar Sistema</h1>
+    </header>
+
+    <main class="dashboard-main">
+      <section class="system-panel">
+        <h2>Monitoramento de EPI</h2>
+        <p>Ao iniciar o sistema, a câmera será ativada e o monitoramento em tempo real começará.</p>
+        <button class="start-btn" onclick="startAPI()">🚀 Iniciar Monitoramento</button>
+        <div id="status" class="status-message">Sistema aguardando inicialização.</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    }
+
+    async function startAPI() {
+      const status = document.getElementById('status');
+      status.innerText = "Iniciando sistema...";
+      status.className = "status-message loading";
+
+      try {
+        const response = await fetch('/start', { method: 'POST' });
+        const data = await response.json();
+        if (data.message) {
+          window.open('/video_feed', '_blank');
+          status.innerText = "Sistema iniciado com sucesso!";
+          status.className = "status-message success";
+        } else {
+          status.innerText = "Erro ao iniciar o sistema.";
+          status.className = "status-message error";
+        }
+      } catch (error) {
+        status.innerText = "Erro ao iniciar a API.";
+        status.className = "status-message error";
+        console.error(error);
+      }
+    }
+  </script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

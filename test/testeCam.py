@@ -1,18 +1,32 @@
 import cv2
 
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Tente mudar para 1 ou outro índice, se necessário
+# Abre a webcam usando DirectShow (necessário para Windows)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
+# Tenta definir a resolução para 1920x1080
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
+# Verifica se conseguiu abrir
 if not cap.isOpened():
-    print("Erro: Não foi possível acessar a webcam.")
-else:
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("Erro: Não foi possível capturar o frame.")
-            break
-        cv2.imshow("Webcam", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    raise RuntimeError("Erro ao acessar a webcam")
+
+# Lê a resolução real após tentar configurar
+camera_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+camera_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+print(f"Resolução da câmera: {camera_width}x{camera_height}")
+
+# Loop para mostrar a imagem
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    cv2.imshow('Webcam', frame)
+
+    if cv2.waitKey(1) == 27:  # Tecla ESC para sair
+        break
 
 cap.release()
 cv2.destroyAllWindows()

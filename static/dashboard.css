@@ -1,0 +1,506 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  background-color: #f4f7fc;
+  color: #333;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #1c1f26;
+  color: #fff;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-header h2 {
+  font-size: 1.5rem;
+  color: #ffffff;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #fff;
+  cursor: pointer;
+  display: none;
+}
+
+.sidebar-list {
+  list-style: none;
+  margin-top: 2rem;
+}
+
+.sidebar-list li {
+  margin-bottom: 1rem;
+}
+
+.sidebar-list a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+.sidebar-list a:hover {
+  color: #4dd0e1;
+}
+
+.sidebar-list i {
+  margin-right: 8px;
+}
+
+/* Main content */
+.main-content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  min-height: 100vh;
+  padding: 2rem;
+  transition: margin-left 0.3s ease;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #2b2b2b;
+}
+
+.open-btn {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+/* Welcome Section */
+.welcome {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.welcome h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: #1e3a8a;
+}
+
+.welcome p {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Status indicators */
+#system-status {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.status-on {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.status-off {
+  background-color: #f44336;
+  color: #fff;
+}
+
+/* Cards Grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card p {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.card-link {
+  display: inline-block;
+  text-decoration: none;
+  color: #fff;
+  background-color: #1e3a8a;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.card-link:hover {
+  background-color: #2e59d1;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    position: absolute;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .open-btn {
+    display: block;
+  }
+
+  .close-btn {
+    display: block;
+  }
+}
+
+.system-panel {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.system-panel h2 {
+  color: #1e3a8a;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.system-panel p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.start-btn {
+  background-color: #1e3a8a;
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.start-btn:hover {
+  background-color: #315dd6;
+}
+
+.status-message {
+  margin-top: 1.5rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.status-message.success {
+  background-color: #1e3a8a;
+  color: #fff;
+}
+
+.status-message.error {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.status-message.loading {
+  background-color: #ff9800;
+  color: #fff;
+}
+
+.notification-intro {
+  margin-bottom: 20px;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.notification-card {
+  background-color: #fff;
+  border-left: 6px solid #d32f2f;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.notification-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #b71c1c;
+}
+
+.notification-time {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.notification-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Relatórios - Estilo adicional */
+
+.dashboard-main {
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: calc(100vh - 60px);
+}
+
+.report-filter {
+    margin-bottom: 30px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.report-filter h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.report-filter label {
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.report-filter input[type="date"] {
+    margin-right: 15px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.report-filter button {
+    padding: 10px 16px;
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.report-filter button:hover {
+    background-color: #2e59d1;
+}
+
+#report-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+#report-section h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+#report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+#report-table th, #report-table td {
+    padding: 12px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+#report-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: bold;
+}
+
+#report-table td {
+    background-color: #fdfdfd;
+}
+
+#report-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+#report-section button {
+    padding: 10px 16px;
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#report-section button:hover {
+    background-color: #2e59d1;
+}
+
+/*Estilo do formulário de adicionar usuário*/
+.user-form {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.user-form h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.user-form form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.user-form input,
+.user-form select {
+    flex: 1 1 200px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.user-form button {
+    padding: 10px 20px;
+    background-color: #1e3a8a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.user-form button:hover {
+    background-color: #2e59d1;
+}
+
+/*Estilo da tabela de usuários*/
+.user-table {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-table h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.user-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table th,
+.user-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.user-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+.user-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.remove-btn {
+    padding: 6px 12px;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.remove-btn:hover {
+    background-color: #b52a37;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .user-form form {
+        flex-direction: column;
+    }
+}

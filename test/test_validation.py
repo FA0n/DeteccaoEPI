@@ -12,7 +12,7 @@ def test_serve_homepage():
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert b"<title>Iniciar API</title>" in response.content
+    assert b"<title>Pagina Inicial</title>" in response.content
 
 def test_websocket_endpoint():
     with client.websocket_connect("/ws") as websocket:

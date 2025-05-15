@@ -1,4 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, WebSocket
+from fastapi.staticfiles import StaticFiles
+from fastapi import BackgroundTasks
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from ultralytics import YOLO
 import webbrowser, cv2, uvicorn
@@ -6,18 +8,27 @@ import os, sys, signal, time, asyncio, base64, threading
 
 app = FastAPI()
 
-is_capturing = False
+is_capturing = True
 
 model = YOLO('models/best.pt')  # Carregar o modelo treinado
 
 # Inicializa a webcam
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
 if not cap.isOpened():
     raise RuntimeError("Erro ao acessar a webcam")
+
+camera_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+camera_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 if not os.path.exists("violations"):
     os.makedirs("violations")
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static/img", StaticFiles(directory="static/img"), name="img")
 @app.get("/")
 def serve_homepage():
     return FileResponse("static/index.html")
@@ -71,12 +82,17 @@ def generate_frames():
             time.sleep(0.1)
             continue
 
+        if cap is None:
+            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            if not cap.isOpened():
+                continue
+
         success, frame = cap.read()
         if not success:
-            break
+            continue
 
         # Redimensiona e processa o frame
-        frame = cv2.resize(frame, (1280, int((1280 / frame.shape[1]) * frame.shape[0])))
+        frame = cv2.resize(frame, (camera_width, camera_height))
         results = model.predict(frame, conf=0.5, device='cpu')
         annotated_frame = results[0].plot()
 
@@ -121,10 +137,18 @@ def start_api():
 def stop_api():
     global cap, is_capturing
     if cap is not None and cap.isOpened():
-        cap.release()
-        cap = None
+        cap.release()        
     is_capturing = False
     return JSONResponse(content={"message": "Captura encerrada com sucesso!"})
+
+@app.get("/shutdown")
+def shutdown_api(background_tasks: BackgroundTasks):
+    def shutdown():
+        time.sleep(1)
+        os.kill(os.getpid(), signal.SIGINT)
+    
+    background_tasks.add_task(shutdown)
+    return JSONResponse(content={"message": "API encerrada com sucesso!"})
 
 def open_browser():
     webbrowser.open("http://127.0.1:8000")

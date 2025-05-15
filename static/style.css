@@ -1,0 +1,376 @@
+:root {
+  --azul-principal: #1e3a8a;
+  --azul-escuro: #1e293b;
+  --azul-gradiente: linear-gradient(135deg, #1e3a8a, #0f172a);
+  --amarelo: #facc15;
+  --cinza-claro: #f8fafc;
+  --cinza-medio: #e2e8f0;
+  --texto: #1f2937;
+  --branco: #ffffff;
+  --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --raio-borda: 10px;
+  --transicao: all 0.3s ease-in-out;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--azul-gradiente);
+  color: var(--texto);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  transition: background 0.4s ease;
+}
+
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: auto;
+  padding-inline: 30px;
+}
+
+/* ===== HEADER E MENU ===== */
+header {
+  background-color: var(--azul-principal);
+  color: white;
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--sombra-suave);
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.logo img {
+  width: 110px;
+  transition: transform 0.3s;
+}
+
+.logo img:hover {
+  transform: scale(1.05);
+}
+
+nav {
+  flex-grow: 1;
+  margin-left: 30px;
+}
+
+.menu {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.menu a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: var(--transicao);
+}
+
+.menu a:hover {
+  background-color: var(--azul-escuro);
+  transform: translateY(-2px);
+}
+
+.btn-login {
+  background-color: var(--amarelo);
+  color: var(--azul-principal);
+  padding: 8px 15px;
+  border-radius: var(--raio-borda);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transicao);
+  margin-left: auto;
+}
+
+.btn-login i {
+  margin-right: 6px;
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+.btn-login:hover {
+  background-color: #eab308;
+  transform: scale(1.05);
+}
+
+.menu-toggle {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+/* ===== SEÇÕES ===== */
+section {
+  padding: 50px 30px;
+  margin: 60px auto;
+  border-radius: var(--raio-borda);
+  background-color: var(--branco);
+  box-shadow: var(--sombra-suave);
+  animation: fadeIn 1s ease both;
+  max-width: 1100px;
+}
+
+.home {
+  background: var(--branco);
+  color: var(--texto);
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.home h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+  animation: slideIn 0.7s ease-out;
+}
+
+h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: var(--azul-principal);
+  position: relative;
+}
+
+h2::after {
+  content: '';
+  width: 60px;
+  height: 3px;
+  background: var(--amarelo);
+  display: block;
+  margin-top: 10px;
+}
+
+/* ===== LISTAS ===== */
+.beneficios ul,
+.aplicacoes ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.beneficios li,
+.aplicacoes li {
+  margin: 12px 0;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+}
+
+.beneficios li i,
+.aplicacoes li i {
+  color: var(--amarelo);
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+/* ===== FORMULÁRIO DE CONTATO ===== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--branco);
+  padding: 30px;
+  border-radius: var(--raio-borda);
+  box-shadow: var(--sombra-suave);
+  animation: fadeInUp 0.8s ease;
+}
+
+form input,
+form textarea {
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+form input:focus,
+form textarea:focus {
+  border-color: var(--azul-principal);
+  outline: none;
+}
+
+form textarea {
+  min-height: 120px;
+}
+
+form button {
+  background-color: var(--azul-principal);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: fit-content;
+  align-self: flex-end;
+  transition: var(--transicao);
+}
+
+form button:hover {
+  background-color: var(--azul-escuro);
+  transform: translateY(-2px);
+}
+
+/* ===== IMAGENS ===== */
+.img-section {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  max-width: 960px;
+  margin: 30px auto 0;
+  display: block;
+  border-radius: var(--raio-borda);
+  box-shadow: var(--sombra-suave);
+}
+
+/* ===== FLEX CONTEÚDO ===== */
+.container-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  background-color: var(--branco);
+  border-radius: var(--raio-borda);
+  padding: 40px;
+  box-shadow: var(--sombra-suave);
+  margin-bottom: 40px;
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.container-flex .texto {
+  flex: 1 1 50%;
+}
+
+.container-flex .imagem {
+  flex: 1 1 40%;
+}
+
+.container-flex .imagem img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: var(--raio-borda);
+  box-shadow: var(--sombra-suave);
+}
+
+.container-flex.reverse {
+  flex-direction: row-reverse;
+}
+
+/* ===== RODAPÉ ===== */
+footer {
+  background-color: var(--azul-principal);
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 60px;
+  border-radius: var(--raio-borda);
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .menu {
+    flex-direction: column;
+    align-items: flex-start;
+    display: none;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .menu.active {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .btn-login {
+    align-self: flex-end;
+    margin-top: 10px;
+  }
+
+  nav {
+    width: 100%;
+  }
+
+  .logo {
+    margin-bottom: 10px;
+  }
+
+  .container-flex,
+  .container-flex.reverse {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .container-flex .imagem,
+  .container-flex .texto {
+    flex: 1 1 100%;
+  }
+
+  .container {
+    padding-inline: 20px;
+  }
+
+  section {
+    padding: 40px 20px;
+    margin: 40px 0;
+  }
+}
