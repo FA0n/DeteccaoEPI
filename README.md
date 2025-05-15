@@ -8,7 +8,7 @@ Instale as dependências:
 
    - Com o ambiente virtual ativo:
       ```
-      pip install fastapi uvicorn uvicorn[standard] torch torchvision ultralytics opencv-python pillow 
+      pip install fastapi uvicorn uvicorn[standard] torch torchvision ultralytics opencv-python pillow
       ```
       ```
       pip install -r requirements.txt
