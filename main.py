@@ -9,10 +9,9 @@ import os, sys, signal, time, asyncio, base64, threading
 app = FastAPI()
 
 is_capturing = False
+cap = None
 
 model = YOLO('models/best.pt')  # Carregar o modelo treinado
-
-cap = None
 
 if not os.path.exists("violations"):
     os.makedirs("violations")
