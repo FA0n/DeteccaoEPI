@@ -8,21 +8,11 @@ import os, sys, signal, time, asyncio, base64, threading
 
 app = FastAPI()
 
-is_capturing = True
+is_capturing = False
 
 model = YOLO('models/best.pt')  # Carregar o modelo treinado
 
-# Inicializa a webcam
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-if not cap.isOpened():
-    raise RuntimeError("Erro ao acessar a webcam")
-
-camera_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-camera_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+cap = None
 
 if not os.path.exists("violations"):
     os.makedirs("violations")
@@ -92,6 +82,8 @@ def generate_frames():
             continue
 
         # Redimensiona e processa o frame
+        camera_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        camera_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         frame = cv2.resize(frame, (camera_width, camera_height))
         results = model.predict(frame, conf=0.5, device='cpu')
         annotated_frame = results[0].plot()
@@ -126,8 +118,12 @@ def video_feed():
 @app.post("/start")
 def start_api():
     global cap, is_capturing
+    # Inicializa a webcam
     if cap is None or not cap.isOpened():
         cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
         if not cap.isOpened():
             return JSONResponse(content={"message": "Erro ao acessar a câmera!"}, status_code=500)
     is_capturing = True
@@ -136,9 +132,9 @@ def start_api():
 @app.get("/stop")
 def stop_api():
     global cap, is_capturing
+    is_capturing = False
     if cap is not None and cap.isOpened():
         cap.release()        
-    is_capturing = False
     return JSONResponse(content={"message": "Captura encerrada com sucesso!"})
 
 @app.get("/shutdown")
