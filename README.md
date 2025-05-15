@@ -6,13 +6,13 @@ Este projeto usa FastAPI + YOLOv8 para detectar EPIs (capacete, colete, etc) em 
 
 Instale as dependências:
 
-   Com o ambiente virtual ativo:
-   ```
-   pip install fastapi uvicorn uvicorn[standard] torch torchvision ultralytics opencv-python pillow 
-   ```
-   ```
-   pip install -r requirements.txt
-   ```
+   - Com o ambiente virtual ativo:
+      ```
+      pip install fastapi uvicorn uvicorn[standard] torch torchvision ultralytics opencv-python pillow 
+      ```
+      ```
+      pip install -r requirements.txt
+      ```
 
 Baixe o modelo YOLO:
 
