@@ -1,14 +1,14 @@
-from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from ultralytics import YOLO
+
 import sys, os
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-os.environ["TEST_ENV"] = "True"
 
 from main import app
 client = TestClient(app)
+from fastapi.testclient import TestClient
+
+os.environ["TEST_ENV"] = "True"
 
 class TestAPI:
     def test_serve_homepage(self):

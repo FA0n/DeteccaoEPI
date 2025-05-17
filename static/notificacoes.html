@@ -77,7 +77,7 @@
 		  .then(res => res.json())
 		  .then(dados => {
 			dados.forEach(n => {
-			  const imgPath = `/${n.filename}`;
+			  const imgPath = `/violations/${n.filename}`;
 			  exibirNotificacao(n.class_name, n.timestamp, imgPath);
 			});
 		  })

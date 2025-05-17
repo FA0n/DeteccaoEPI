@@ -36,6 +36,10 @@ app.mount("/violations", StaticFiles(directory=VIOLATIONS_DIR), name="violations
 def serve_homepage():
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
+@app.get("/status")
+def serve_status():
+    return JSONResponse(content={"status": "OK"})
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -50,26 +54,19 @@ async def websocket_endpoint(websocket: WebSocket):
         if websocket in active_connections:
             active_connections.remove(websocket)
 
-# Função para enviar notificações via WebSocket
-async def send_alert(class_name: str, filename: str):
-    # Lê a imagem salva e converte para base64
-    with open(filename, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-    # Cria a mensagem com a imagem em base64
-    message = {
-        "class_name": class_name,
-        "filename": os.path.basename(filename),
-        "image": encoded_string
-    }
-    salvar_notificacao(class_name, filename)
-    # Envia a mensagem para todas as conexões WebSocket ativas
-    for connection in active_connections:
-        await connection.send_json(message)
+@app.get("/notifications")
+def listar_notificacoes():
+    try:
+        with open(NOTIFICATIONS_FILE, "r") as file:
+            notificacoes = json.load(file)
+    except FileNotFoundError:
+        notificacoes = []
+    return notificacoes
 
 def salvar_notificacao(class_name: str, filename: str):
     notificacao = {
         "class_name": class_name,
-        "filename": os.path.basename(filename),
+        "filename": f'/violations/{os.path.basename(filename)}',
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     }
     try:
@@ -80,15 +77,22 @@ def salvar_notificacao(class_name: str, filename: str):
     notificacoes.append(notificacao)
     with open(NOTIFICATIONS_FILE, "w") as file:
         json.dump(notificacoes, file, indent=2)
-        
-@app.get("/notifications")
-def listar_notificacoes():
-    try:
-        with open(NOTIFICATIONS_FILE, "r") as file:
-            notificacoes = json.load(file)
-    except FileNotFoundError:
-        notificacoes = []
-    return notificacoes
+
+# Função para enviar notificações via WebSocket
+async def send_alert(class_name: str, filename: str):
+    # Lê a imagem salva e converte para base64
+    with open(filename, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+    # Cria a mensagem com a imagem em base64
+    message = {
+        "class_name": class_name,
+        "filename": f'violations/{os.path.basename(filename)}',
+        "image": encoded_string
+    }
+    salvar_notificacao(class_name, filename)
+    # Envia a mensagem para todas as conexões WebSocket ativas
+    for connection in active_connections:
+        await connection.send_json(message)
 
 # Função para capturar frames da webcam e detectar
 def generate_frames():
