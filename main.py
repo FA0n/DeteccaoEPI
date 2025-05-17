@@ -1,33 +1,40 @@
+from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from fastapi import FastAPI, UploadFile, File, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi import BackgroundTasks
-from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
 from ultralytics import YOLO
 import webbrowser, cv2, uvicorn, json
-import os, sys, signal, time, asyncio, base64, threading
+import os, sys, signal, time, asyncio, base64, threading, platform
 
+#Variaveis globais
 app = FastAPI()
-
 is_capturing = False
 cap = None
+camera_width = 1080
+camera_height = 720
+active_connections = [] # Lista de conexões WebSocket ativas
 
-model = YOLO('models/best.pt')  # Carregar o modelo treinado
-
+# Carregar o modelo treinado
+model = YOLO(os.path.join('models', 'best.pt'))
+             
+# Diretórios
+STATIC_DIR = "static"
+IMG_DIR = os.path.join(STATIC_DIR, "img")
+VIOLATIONS_DIR = "violations"
 NOTIFICATIONS_FILE = "notifications.json"
 
-if not os.path.exists("violations"):
-    os.makedirs("violations")
+#Verifica se as pastas existem, se não existir cria
+os.makedirs(VIOLATIONS_DIR, exist_ok=True)
+os.makedirs(IMG_DIR, exist_ok=True)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/static/img", StaticFiles(directory="static/img"), name="img")
-app.mount("/violations", StaticFiles(directory="violations"), name="violations")
+# Deixa os arquivos estáticos para o Frontend
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/static/img", StaticFiles(directory=IMG_DIR), name="img")
+app.mount("/violations", StaticFiles(directory=VIOLATIONS_DIR), name="violations")
 
 @app.get("/")
 def serve_homepage():
-    return FileResponse("static/index.html")
-
-# Lista de conexões WebSocket ativas
-active_connections = []
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -62,7 +69,7 @@ async def send_alert(class_name: str, filename: str):
 def salvar_notificacao(class_name: str, filename: str):
     notificacao = {
         "class_name": class_name,
-        "filename": filename,
+        "filename": os.path.basename(filename),
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     }
     try:
@@ -70,7 +77,6 @@ def salvar_notificacao(class_name: str, filename: str):
             notificacoes = json.load(file)
     except FileNotFoundError:
         notificacoes = []
-
     notificacoes.append(notificacao)
     with open(NOTIFICATIONS_FILE, "w") as file:
         json.dump(notificacoes, file, indent=2)
@@ -86,9 +92,17 @@ def listar_notificacoes():
 
 # Função para capturar frames da webcam e detectar
 def generate_frames():
-    global cap, is_capturing
+    global cap, is_capturing, camera_width, camera_height
+
     # if cap is None or not cap.isOpened():
-    #     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Recria o objeto cap
+    #     if platform.system() == "Windows":
+    #         cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    #         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+    #         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    #     else:
+    #         cap = cv2.VideoCapture(0)
+    #         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+    #         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     #     if not cap.isOpened():
     #         raise RuntimeError("Erro ao acessar a câmera!")
 
@@ -100,18 +114,11 @@ def generate_frames():
             time.sleep(0.1)
             continue
 
-        if cap is None:
-            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-            if not cap.isOpened():
-                continue
-
         success, frame = cap.read()
         if not success:
             continue
 
         # Redimensiona e processa o frame
-        camera_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        camera_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         frame = cv2.resize(frame, (camera_width, camera_height))
         results = model.predict(frame, conf=0.5, device='cpu')
         annotated_frame = results[0].plot()
@@ -125,12 +132,15 @@ def generate_frames():
                 if current_time - last_saved_time > delay:
                     last_saved_time = current_time
                     timestamp = time.strftime("%Y%m%d-%H%M%S")
-                    filename = f"violations/{class_name}_{timestamp}.jpg"
+                    filename = os.path.join(VIOLATIONS_DIR, f"{class_name}_{timestamp}.jpg")
                     cv2.imwrite(filename, frame)
                     print(f"Imagem salva: {filename}")
 
                     # Envia uma notificação
-                    asyncio.run(send_alert(class_name, filename))
+                    try:
+                        asyncio.run(send_alert(class_name, filename))
+                    except Exception as e:
+                        print(f"Erro ao enviar notificação: {e}")
 
         _, buffer = cv2.imencode('.jpg', annotated_frame)
         frame = buffer.tobytes()
@@ -145,13 +155,17 @@ def video_feed():
 
 @app.post("/start")
 def start_api():
-    global cap, is_capturing
+    global cap, is_capturing, camera_width, camera_height
     # Inicializa a webcam
     if cap is None or not cap.isOpened():
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        if platform.system() == "Windows":
+            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        else:
+            cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
+        camera_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        camera_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         if not cap.isOpened():
             return JSONResponse(content={"message": "Erro ao acessar a câmera!"}, status_code=500)
     is_capturing = True
@@ -165,14 +179,14 @@ def stop_api():
         cap.release()        
     return JSONResponse(content={"message": "Captura encerrada com sucesso!"})
 
-@app.get("/shutdown")
-def shutdown_api(background_tasks: BackgroundTasks):
-    def shutdown():
-        time.sleep(1)
-        os.kill(os.getpid(), signal.SIGINT)
+# @app.get("/shutdown")
+# def shutdown_api(background_tasks: BackgroundTasks):
+#     def shutdown():
+#         time.sleep(1)
+#         os.kill(os.getpid(), signal.SIGINT)
     
-    background_tasks.add_task(shutdown)
-    return JSONResponse(content={"message": "API encerrada com sucesso!"})
+#     background_tasks.add_task(shutdown)
+#     return JSONResponse(content={"message": "API encerrada com sucesso!"})
 
 def open_browser():
     webbrowser.open("http://127.0.1:8000")
@@ -186,7 +200,10 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
+
+
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-    threading.Thread(target=open_browser, daemon=True).start()
-    asyncio.run(uvicorn.run(app, host="127.0.0.1", port=8000))
+    if os.environ.get("TEST_ENV") != "True":
+        threading.Thread(target=open_browser, daemon=True).start()
+        asyncio.run(uvicorn.run(app, host="127.0.0.1", port=8000))

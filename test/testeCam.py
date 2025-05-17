@@ -1,7 +1,10 @@
-import cv2
+import cv2, platform
 
-# Abre a webcam usando DirectShow (necessário para Windows)
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+# Abre a webcam usando
+if platform.system() == "Windows":
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+else:
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 # Tenta definir a resolução para 1920x1080
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
