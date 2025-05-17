@@ -5,10 +5,11 @@ from ultralytics import YOLO
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+os.environ["TEST_ENV"] = "True"
+
 from main import app
 client = TestClient(app)
 
-os.environ["TEST_ENV"] = "True"
 
 class TestAPI:
     def test_serve_homepage(self):

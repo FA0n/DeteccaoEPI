@@ -1,16 +1,17 @@
+from utils import send_alert, VIOLATIONS_DIR
 import cv2, time, asyncio, os, platform
 from ultralytics import YOLO
-from utils import send_alert
 
 model = YOLO(os.path.join("models", "best.pt"))
-
-VIOLATIONS_DIR = "violations"
 
 class CameraManager:
     def __init__(self, src, name):
         self.src = src
         self.name = name
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        if platform.system() == "Windows":
+            self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        else:
+            self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.last_savad_time = 0
