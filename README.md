@@ -45,3 +45,14 @@ Como Acessar e utilizar:
 
    - O sistema esta em desenvolvimento, pode e vão ter muitos erros.
    
+# 🛡️ Melhorias a implementar:
+## Rodar como serviço (Linux):
+   - Para iniciar o sistema automaticamente com o servidor
+## Permitir múltiplas câmeras ou IP cameras:
+   - Passar a fonte da câmera como parâmetro,
+## Painel de controle para admin:
+   - Interface web para iniciar/parar, ver logs, configurar alertas etc.
+## Dockerização:
+   - Facilitar a instalação e o deploy em qualquer máquina
+## Banco de dados real (SQLite, PostgreSQL):
+   - Substituir o notifications.json por algo mais robusto
