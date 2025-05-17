@@ -36,7 +36,35 @@ class CameraManager:
         camera_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         frame = cv2.resize(frame, (camera_width, camera_height))
         results = model.predict(frame, conf=0.5, device='cpu')
-        annotated_frame = results[0].plot()
+        # annotated_frame = results[0].plot()
+        boxes = results[0].boxes
+        annotated_frame = frame.copy()
+
+        CLASS_COLORS = {
+            0: (0, 0, 255),      # not_helmet - vermelho
+            1: (0, 165, 255),    # not_reflective - laranja
+            2: (0, 255, 0),      # helmet - verde
+            3: (255, 255, 0),    # reflective - ciano
+        }
+
+        for box in boxes.data:
+            x1, y1, x2, y2 = map(int, box[:4])
+            confidence = float(box[4])
+            class_id = int(box[-1])
+            class_name = model.names[class_id]
+
+            if class_name in ['not_helmet', 'not_reflective']:
+                color = (0, 0, 255)
+            else:
+                color = CLASS_COLORS.get(class_id, (0, 255, 0))
+
+            label = f"{class_name} {confidence:.2f}"
+            cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(annotated_frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                
+            (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+            cv2.rectangle(annotated_frame, (x1, y1 - text_height - baseline), (x1 + text_width, y1), color, -1)
+            cv2.putText(annotated_frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
         for box in results[0].boxes.data:
             class_id = int(box[-1])
