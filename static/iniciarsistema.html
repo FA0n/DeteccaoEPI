@@ -53,7 +53,7 @@
         const response = await fetch('/start', { method: 'POST' });
         const data = await response.json();
         if (data.message) {
-          window.open('/video_feed', '_blank');
+          window.open('/video_feed/webcam', '_blank');
           status.innerText = "Sistema iniciado com sucesso!";
           status.className = "status-message success";
         } else {
