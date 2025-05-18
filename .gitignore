@@ -5,4 +5,4 @@ datasets/
 *.pyo
 *.log
 *.sqlite3models
-models/
+test/
