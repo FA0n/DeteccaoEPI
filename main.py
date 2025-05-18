@@ -1,9 +1,10 @@
+from utils import NOTIFICATIONS_FILE, STATIC_DIR, VIOLATIONS_DIR, IMG_DIR, active_connections
 from manager_cameras import start_cameras, stop_cameras, generate_frames, cameras
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
-from utils import NOTIFICATIONS_FILE, STATIC_DIR, VIOLATIONS_DIR, IMG_DIR, active_connections
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, WebSocket
+
 import webbrowser, uvicorn, json
 import os, sys, signal, asyncio, threading
 
