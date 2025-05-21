@@ -161,11 +161,10 @@ class CameraManager:
         
 # Dicionário de câmeras
 cameras = {
-    "webcam": CameraManager(0, "webcam"),
-    # "ip_cam1": CameraManager("rtsp://usuario:senha@192.168.1.100:554/stream1", "ip_cam1"),
+    # "webcam": CameraManager(0, "webcam"),
+    # "ip_cam1": CameraManager("rtsp://eu:357800!9@10.0.0.103:554/stream1", "ip_cam1"),
     # "ip_cam2": CameraManager("rtsp://usuario:senha@192.168.1.101:554/stream2", "ip_cam2"),
 } 
-    
 
 def start_cameras():
     for cam in cameras.values():

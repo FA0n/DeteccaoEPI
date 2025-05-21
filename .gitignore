@@ -6,3 +6,4 @@ datasets/
 *.log
 *.sqlite3models
 test/
+admin/
