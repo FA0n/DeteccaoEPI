@@ -1,10 +1,20 @@
-import cv2, time, asyncio, os, torch
+import time, asyncio, os, face_recognition, torch, cv2
 import numpy as np
 
 from utils import send_alert, VIOLATIONS_DIR
 from ultralytics import YOLO
 
 model = YOLO(os.path.join("models", "best.pt"))
+
+know_face_encodings = []
+know_face_names = []
+for filename in os.listdir("faces"):
+    path = os.path.join("faces", filename)
+    image = face_recognition.load_image_file(path)
+    encodings = face_recognition.face_encodings(image)
+    if encodings:
+        know_face_encodings.append(encodings[0])
+        know_face_names.append(os.path.splitext(filename)[0])
 
 class CameraManager:
     def __init__(self, src, name):
@@ -13,6 +23,7 @@ class CameraManager:
         self.cap = cv2.VideoCapture(self.src)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
         self.last_saved_time = 0
         self.delay = 5
         self.max_retries = 5
@@ -23,15 +34,15 @@ class CameraManager:
     def reconnect(self):
         print(f"Reconectando à câmera {self.name}...")
         self.cap.release()
-        attenmpts = 0
+        attempts = 0
 
-        while not self.cap.isOpened() and attenmpts < self.max_retries:
+        while not self.cap.isOpened() and attempts < self.max_retries:
             self.cap = cv2.VideoCapture(self.src)
             if self.cap.isOpened():
                 print(f"Câmera {self.name} reconectada com sucesso.")
                 return True
-            attenmpts += 1
-            print(f"Tentativa {attenmpts} de {self.max_retries} para reconectar à câmera {self.name}.")
+            attempts += 1
+            print(f"Tentativa {attempts} de {self.max_retries} para reconectar à câmera {self.name}.")
             time.sleep(2)
 
         print(f"Falha ao reconectar à câmera {self.name}.")
@@ -78,10 +89,30 @@ class CameraManager:
             3: (255, 255, 0),    # reflective - ciano
         }
 
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        face_locations = face_recognition.face_locations(rgb_frame)
+        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+
+        recognized_faces = []
+        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            matches = face_recognition.compare_faces(know_face_encodings, face_encoding)
+            name = "Desconhecido"
+
+            if True in matches:
+                first_matches_index = matches.index(True)
+                name = know_face_names[first_matches_index]
+
+            recognized_faces.append(name)
+              
+            # Desenhar o nome e a caixa no frame
+            cv2.rectangle(annotated_frame, (left, top), (right, bottom), (0, 255, 255), 2)
+            cv2.putText(annotated_frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+
         for box in boxes.data:
+            box = box.cpu().numpy()
             x1, y1, x2, y2 = map(int, box[:4])
             confidence = float(box[4])
-            class_id = int(box[-1])
+            class_id = int(box[5])
             class_name = model.names[class_id]
             
             is_violation = class_name in ['not_helmet', 'not_reflective']
@@ -93,7 +124,7 @@ class CameraManager:
                 marker = "[OK]"
 
             # Desenha a bounding box
-            cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), color, 2)
+            # cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), color, 2)
             label = f"{marker}{class_name} {confidence:.2f}"
 
             # Tamnho do texto
