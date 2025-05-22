@@ -218,3 +218,4 @@ def generate_frames(camera_name):
             break
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        
