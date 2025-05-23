@@ -301,7 +301,8 @@ body {
 }
 
 .notification-image {
-  max-width: 100%;
+  max-width: 300px;
+  width: 100%;
   height: auto;
   border-radius: 4px;
   border: 1px solid #ccc;

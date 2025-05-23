@@ -63,7 +63,7 @@ def stop_api():
 
 # Endpoint para vídeo em tempo real
 @app.get("/video_feed/{camera_name}")
-def video_feed(camera_name: str = "webcam"):
+def video_feed(camera_name: str):
     if camera_name not in cameras:
         return JSONResponse(content={"error": "Câmera não encontrada!"}, status_code=404)
     return StreamingResponse(generate_frames(camera_name), media_type="multipart/x-mixed-replace; boundary=frame")
